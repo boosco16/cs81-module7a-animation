@@ -8,34 +8,60 @@
 
   <div id="loader" style="font-size: 2rem; margin-bottom: 20px;">Loading...</div>
   <div id="status">Please wait</div>
+  <!-- div I added for my feature, shows the cycle count -->
+  <div id="progress" style="margin-top: 10px; color: #555;"></div>
 
   <script>
     function runLoadingAnimation() {
+      // this grabs the loader and status elements once, up front so getElementById doesn't get called repeatedly every time the loop runs below
       const loader = document.getElementById("loader");
       const status = document.getElementById("status");
+      const progress = document.getElementById("progress"); // my new div
 
+      // just the list of things the loader text cycles through
       const frames = ["⏳", "⌛", ".", "..", "..."];
-      let index = 0;
-      let cycleCount = 0;
-      const maxCycles = 10;
 
+       let index = 0;       // which frame is showing right now
+      let cycleCount = 0;  // how many full times it's gone through the list
+      const maxCycles = 10; // stop after this many full cycles
+ 
+      // setInterval means to run this code again every 500ms, forever, until something stops it. It runs in the background without freezing the rest of the page while it waits. 
       const interval = setInterval(() => {
+        // this line took me a bit to get. index just keeps counting up forever but frames only has 5 things in it. If we used frames[index] directly, it would
+        // break once index hit 5, since frames[5] doesn't exist. The "%" (modulo) gives back the remainder after dividing, so
+        // index % 5 just keeps cycling through 0,1,2,3,4,0,1,2,3,4... forever, even though index itself never stops climbing.
+        // that's what makes the frames array loop instead of breaking. 
         loader.textContent = frames[index % frames.length];
         index++;
+ 
+        // every time index lands back on a multiple of 5 (frames.length), that means it made it through the whole list one full time
         if (index % frames.length === 0) {
           cycleCount++;
+          // updating my new progress div so the count is actually
+          // visible instead of just happening in the background
+          progress.textContent = "Cycle " + cycleCount + " of " + maxCycles;
         }
+ 
+        // once cycleCount reaches maxCycles, everything stops
         if (cycleCount >= maxCycles) {
+          // clearInterval is what actually stops setInterval from
+          // firing again.
           clearInterval(interval);
           loader.textContent = "✅";
           status.textContent = "Done!";
+          progress.textContent = "";
+          // NEW FEATURE: change the background when it's done, so
+          // there's something visual besides just the text changing
+          document.body.style.backgroundColor = "#5dbb78";
         }
       }, 500);
     }
-
+ 
+    // CREATIVE IDEA:  
+    // could play a little sound when it finishes using new Audio("ping.mp3").play() so there's something you hear too, not just something you see. 
+ 
     runLoadingAnimation();
   </script>
-
+ 
 </body>
 </html>
-  
